@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Lab: Cloning with pUC18 - Created by Dr. M. K. Jaganathan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application is structured as a linear, step-by-step "Virtual Lab" workflow. This design was chosen because the source material is a pedagogical case study that follows a logical experimental procedure. New initial steps require vector and host strain selection, adding critical thinking challenges. The structure then guides the user from the initial problem (briefing), through the experimental steps (digestion, ligation, transformation, screening), to interpreting controls and performing interactive verification. This sequential flow is the most intuitive way for a student to learn and apply the concepts in the correct order. Key interactions include selecting enzymes, calculating plasmid size, choosing media components, identifying correct colonies, interpreting control plates, and selecting PCR primers, with immediate feedback to reinforce learning at each stage. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Vector choice (pUC18 vs pBR322) -> Goal: Test -> Viz: Interactive selection cards -> Interaction: User click & validation -> Justification: Tests understanding of vector features for a specific goal (blue-white screening).
+        - Report Info: Strain choice (DH5α vs JM109) -> Goal: Test -> Viz: Interactive selection cards -> Interaction: User click & validation -> Justification: Tests understanding of required host genotype (lacZΔM15) for α-complementation.
+        - Report Info: Digestion enzymes -> Goal: Test -> Viz: HTML/CSS diagram of plasmid/insert + Checkbox form -> Interaction: User selection & validation -> Justification: Actively tests the core concept of compatible ends.
+        - Report Info: Plasmid size -> Goal: Test -> Viz: Input field -> Interaction: User calculation & submission -> Justification: Assesses understanding of plasmid construction.
+        - Report Info: Selection/Screening reagents -> Goal: Test -> Viz: Checklist form -> Interaction: User selection & validation -> Justification: Tests knowledge of antibiotic selection and blue-white screening principles.
+        - Report Info: Blue vs. White colonies -> Goal: Test & Explain -> Viz: HTML/CSS petri dish + Chart.js Donut Chart -> Interaction: User clicks on colony type to get info -> Justification: Visually represents the experimental outcome and provides a clear choice.
+        - Report Info: Experimental Controls -> Goal: Test -> Viz: Interactive quiz with images of control plates -> Interaction: User selects interpretation -> Justification: Reinforces the purpose and expected outcomes of standard experimental controls.
+        - Report Info: Verification by PCR -> Goal: Test -> Viz: Interactive diagram of plasmid with primer binding sites + Checkbox form -> Interaction: User selects primer pair -> Justification: Tests a deeper understanding of how PCR is used to verify insert presence and orientation, a critical analysis step.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .step-card {
+            transition: all 0.3s ease-in-out;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .step-card.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .step-card.completed {
+            opacity: 0.9;
+            border-color: #10B981; /* Emerald-500 */
+        }
+        .selection-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .selection-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .selection-card.selected {
+            border-color: #2563EB; /* blue-600 */
+            box-shadow: 0 0 0 2px #2563EB;
+        }
+        .colony {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .colony:hover {
+            transform: scale(1.5);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 300px;
+        }
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            vertical-align: -0.125em;
+            border: 0.2em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-sky-800">Case Study: Choosing a Vector & Cloning a Gene</h1>
+            <p class="mt-2 text-lg text-slate-600">An Interactive Virtual Lab by Dr. M. K. Jaganathan</p>
+        </header>
+
+        <!-- Section 1: The Briefing -->
+        <section id="briefing" class="mb-12">
+            <h2 class="text-2xl font-bold border-b-2 border-sky-200 pb-2 mb-4">1. Your Mission Briefing</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
+                <p class="font-semibold text-lg">Background</p>
+                <p>You are a research assistant tasked with cloning a 750 bp gene, <strong>geneX</strong>, which has an <strong>EcoRI</strong> site at its 5' end and a <strong>HindIII</strong> site at its 3' end. The primary goal is to use <strong>blue-white screening</strong> to identify colonies containing the insert.</p>
+                <p class="font-semibold text-lg mt-4">Your First Challenge: Choose the Right Tools</p>
+                <p>You have multiple plasmids and E. coli strains available. Based on the experimental goal, you must select the appropriate vector and host strain to proceed.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Prerequisite Selection -->
+        <section id="prerequisite-selection">
+            <!-- Vector Selection -->
+            <div id="vector-selection-step">
+                <h2 class="text-2xl font-bold border-b-2 border-sky-200 pb-2 mb-4">2a. Vector Selection</h2>
+                <p class="mb-8 text-slate-600">Analyze the features of each vector below and click on the one you will use for your experiment.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div id="select-puc18" class="selection-card bg-white p-6 rounded-lg shadow-md border-2 border-transparent">
+                        <h3 class="text-xl font-bold text-sky-700">pUC18</h3>
+                        <ul class="mt-4 space-y-2 text-sm">
+                            <li class="flex items-center"><span class="text-emerald-500 mr-2">✔️</span><span><strong>Size:</strong> 2686 bp</span></li>
+                            <li class="flex items-center"><span class="text-emerald-500 mr-2">✔️</span><span><strong>Resistance:</strong> Ampicillin (`ampR`)</span></li>
+                            <li class="flex items-center"><span class="text-emerald-500 mr-2">✔️</span><span><strong>Screening:</strong> `lacZα` gene for blue-white screening.</span></li>
+                            <li class="flex items-center"><span class="text-emerald-500 mr-2">✔️</span><span><strong>MCS:</strong> Contains EcoRI, HindIII.</span></li>
+                        </ul>
+                    </div>
+                    <div id="select-pbr322" class="selection-card bg-white p-6 rounded-lg shadow-md border-2 border-transparent">
+                        <h3 class="text-xl font-bold text-sky-700">pBR322</h3>
+                         <ul class="mt-4 space-y-2 text-sm">
+                            <li class="flex items-center"><span class="text-emerald-500 mr-2">✔️</span><span><strong>Size:</strong> 4361 bp</span></li>
+                            <li class="flex items-center"><span class="text-emerald-500 mr-2">✔️</span><span><strong>Resistance:</strong> Ampicillin (`ampR`) & Tetracycline (`tetR`)</span></li>
+                            <li class="flex items-center"><span class="text-red-500 mr-2">❌</span><span><strong>Screening:</strong> No `lacZα` gene.</span></li>
+                            <li class="flex items-center"><span class="text-emerald-500 mr-2">✔️</span><span><strong>Sites:</strong> Contains EcoRI, HindIII.</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="vector-feedback" class="mt-6 p-4 rounded-lg hidden"></div>
+            </div>
+            <!-- Strain Selection -->
+            <div id="strain-selection-step" class="mt-12">
+                <h2 class="text-2xl font-bold border-b-2 border-sky-200 pb-2 mb-4">2b. Host Strain Selection</h2>
+                <p class="mb-8 text-slate-600">Now select the appropriate host *E. coli* strain for blue-white screening with your chosen vector.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div id="select-dh5a" class="selection-card bg-white p-6 rounded-lg shadow-md border-2 border-transparent">
+                        <h3 class="text-xl font-bold text-sky-700">DH5α</h3>
+                        <ul class="mt-4 space-y-2 text-sm">
+                            <li class="flex items-center"><span class="text-emerald-500 mr-2">✔️</span><span>Genotype includes `lacZΔM15`.</span></li>
+                            <li class="flex items-center"><span class="text-slate-400 mr-2">ℹ️</span><span>This deletion allows for α-complementation.</span></li>
+                        </ul>
+                    </div>
+                    <div id="select-jm109" class="selection-card bg-white p-6 rounded-lg shadow-md border-2 border-transparent">
+                        <h3 class="text-xl font-bold text-sky-700">JM109</h3>
+                         <ul class="mt-4 space-y-2 text-sm">
+                            <li class="flex items-center"><span class="text-emerald-500 mr-2">✔️</span><span>Genotype includes `lacZΔM15`.</span></li>
+                            <li class="flex items-center"><span class="text-slate-400 mr-2">ℹ️</span><span>This deletion allows for α-complementation.</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="strain-feedback" class="mt-6 p-4 rounded-lg hidden"></div>
+            </div>
+        </section>
+
+        <!-- Section 3: The Interactive Workflow -->
+        <section id="workflow" class="hidden mt-12">
+            <h2 class="text-2xl font-bold border-b-2 border-sky-200 pb-2 mb-4">3. Experimental Workflow</h2>
+            <p class="mb-8 text-slate-600">You've made the correct choices! Now, guide the pUC18 vector through the cloning experiment. Complete each step to proceed to the next.</p>
+
+            <div id="step1" class="step-card active bg-white p-6 rounded-lg shadow-md border-2 border-transparent mb-6">
+                <h3 class="text-xl font-bold mb-4">Step 1: Digestion Strategy</h3>
+                <p class="mb-4">To insert `geneX` into pUC18, you must first cut the circular vector to make it linear and create compatible "sticky ends".</p>
+                <div class="flex flex-col md:flex-row items-center justify-around mb-6">
+                    <div class="text-center mb-4 md:mb-0">
+                        <div id="plasmid-vis" class="relative w-24 h-24 border-4 border-blue-500 rounded-full flex items-center justify-center font-mono text-sm">pUC18</div>
+                        <p class="mt-2 text-sm">Vector (2686 bp)</p>
+                    </div>
+                    <div class="text-center">
+                        <div id="insert-vis" class="w-32 h-1 bg-purple-500 my-12"></div>
+                        <p class="text-sm">geneX (750 bp)</p>
+                    </div>
+                </div>
+                <p class="font-semibold mb-2">What restriction enzyme(s) will you use to prepare your pUC18 vector?</p>
+                <div id="enzyme-choices" class="space-y-2 mb-4">
+                    <label class="flex items-center"><input type="checkbox" name="enzyme" value="EcoRI" class="mr-2"> EcoRI</label>
+                    <label class="flex items-center"><input type="checkbox" name="enzyme" value="HindIII" class="mr-2"> HindIII</label>
+                    <label class="flex items-center"><input type="checkbox" name="enzyme" value="BamHI" class="mr-2"> BamHI</label>
+                </div>
+                <button id="digest-btn" class="bg-sky-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-700 transition flex items-center justify-center">Perform Digestion</button>
+                <div id="digest-feedback" class="mt-4 p-3 rounded-lg hidden"></div>
+            </div>
+            <div id="step2" class="step-card bg-white p-6 rounded-lg shadow-md border-2 border-transparent mb-6">
+                <h3 class="text-xl font-bold mb-4">Step 2: Ligation & the Recombinant Plasmid</h3>
+                <p class="mb-4">Now that both the vector and insert have compatible ends, they can be joined together by T4 DNA Ligase.</p>
+                <p class="font-semibold mb-2">After successful ligation, what is the total size (in bp) of the new recombinant plasmid (pUC18-`geneX`)?</p>
+                <input type="number" id="plasmid-size-input" class="border rounded-lg p-2 w-48 mr-2" placeholder="Enter size in bp">
+                <button id="ligate-btn" class="bg-sky-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-700 transition flex items-center justify-center">Check Size</button>
+                <div id="ligate-feedback" class="mt-4 p-3 rounded-lg hidden"></div>
+            </div>
+            <div id="step3" class="step-card bg-white p-6 rounded-lg shadow-md border-2 border-transparent mb-6">
+                <h3 class="text-xl font-bold mb-4">Step 3: Transformation and Selection</h3>
+                <p class="mb-4">The ligation mix is added to competent *E. coli* cells. To select for cells that successfully took up a plasmid and to screen for the ones with the insert, what crucial components must be added to the LB agar plates?</p>
+                <div id="plate-choices" class="space-y-2 mb-4">
+                    <label class="flex items-center"><input type="checkbox" name="plate" value="Ampicillin" class="mr-2"> Ampicillin</label>
+                    <label class="flex items-center"><input type="checkbox" name="plate" value="IPTG" class="mr-2"> IPTG</label>
+                    <label class="flex items-center"><input type="checkbox" name="plate" value="X-gal" class="mr-2"> X-gal</label>
+                    <label class="flex items-center"><input type="checkbox" name="plate" value="Tetracycline" class="mr-2"> Tetracycline</label>
+                </div>
+                <button id="plate-btn" class="bg-sky-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-700 transition flex items-center justify-center">Prepare Plates</button>
+                <div id="plate-feedback" class="mt-4 p-3 rounded-lg hidden"></div>
+            </div>
+            <div id="step4" class="step-card bg-white p-6 rounded-lg shadow-md border-2 border-transparent mb-6">
+                <h3 class="text-xl font-bold mb-4">Step 4: Screening for the Correct Insert</h3>
+                <p class="mb-6">After incubation, you observe colonies on your plate. Which colonies should you pick to find your `geneX` insert? Click on a colony type to learn more.</p>
+                <div class="flex flex-col md:flex-row gap-8 items-center justify-center">
+                    <div class="w-full md:w-1/2">
+                        <p class="text-center font-semibold mb-2">Petri Dish Results</p>
+                        <div id="petri-dish" class="relative w-64 h-64 mx-auto bg-amber-100 rounded-full border-2 border-amber-300 shadow-inner"></div>
+                    </div>
+                    <div class="w-full md:w-1/2">
+                        <p class="text-center font-semibold mb-2">Theoretical Outcomes</p>
+                        <div class="chart-container"><canvas id="outcomeChart"></canvas></div>
+                    </div>
+                </div>
+                <div id="colony-feedback" class="mt-6 p-4 rounded-lg bg-gray-100 hidden"></div>
+            </div>
+        </section>
+
+        <!-- Section 4: Interpret Controls -->
+        <section id="controls" class="hidden mt-12">
+            <h2 class="text-2xl font-bold border-b-2 border-sky-200 pb-2 mb-4">4. Interpreting Controls</h2>
+            <p class="mb-8 text-slate-600">A good experiment includes controls. You also prepared a control ligation that contained the digested pUC18 vector but <strong>no `geneX` insert</strong>. After transformation, you plated this on the same Amp/IPTG/X-gal plate.</p>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold mb-4">Control Plate Result</h3>
+                <p class="mb-4">Your control plate has many blue colonies, but very few (or no) white colonies. What does this result tell you?</p>
+                <div id="control-choices" class="space-y-2">
+                    <label class="block p-3 rounded-lg border hover:bg-gray-50"><input type="radio" name="control-choice" value="wrong" class="mr-2"> The T4 DNA ligase is not working.</label>
+                    <label class="block p-3 rounded-lg border hover:bg-gray-50"><input type="radio" name="control-choice" value="correct" class="mr-2"> The digestion and ligation of the vector worked, and the blue-white screening system is functional.</label>
+                    <label class="block p-3 rounded-lg border hover:bg-gray-50"><input type="radio" name="control-choice" value="wrong" class="mr-2"> The ampicillin is not effective.</label>
+                </div>
+                <button id="control-btn" class="mt-4 bg-sky-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-700 transition">Analyze Control</button>
+                <div id="control-feedback" class="mt-4 p-3 rounded-lg hidden"></div>
+            </div>
+        </section>
+
+        <!-- Section 5: Verification -->
+        <section id="verification" class="hidden mt-12">
+            <h2 class="text-2xl font-bold border-b-2 border-sky-200 pb-2 mb-4">5. Final Verification</h2>
+            <p class="mb-6 text-slate-600">Excellent! You've identified the correct colonies and interpreted the controls. The final step is to verify the insert's presence and orientation.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Restriction Digest -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="font-bold text-lg text-sky-800">A) Restriction Digest Analysis</h3>
+                    <p class="mt-2">Isolating the plasmid and digesting with EcoRI & HindIII is one way to verify the insert. A successful clone will yield two bands on a gel: the vector backbone (~2686 bp) and your `geneX` insert (750 bp).</p>
+                </div>
+                <!-- Interactive PCR -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="font-bold text-lg text-sky-800">B) Interactive PCR Verification</h3>
+                    <p class="mt-2 mb-4">Another method is Colony PCR. Below is a map of your recombinant plasmid. Select the <strong>one forward and one reverse primer</strong> that would amplify the entire `geneX` insert and confirm its correct orientation.</p>
+                    <!-- PCR Diagram -->
+                    <div class="relative p-4 border rounded-lg bg-gray-50 mb-4">
+                        <div class="w-full h-2 bg-blue-400 rounded-full flex items-center">
+                            <div class="h-2 bg-purple-500" style="width: 25%; margin-left: 37.5%;"></div>
+                        </div>
+                        <div class="absolute text-xs" style="top: 2rem; left: 10%;">Primer A (Fwd) →</div>
+                        <div class="absolute w-0.5 h-3 bg-red-500" style="top: 1.25rem; left: 15%;"></div>
+                        
+                        <div class="absolute text-xs" style="top: 2rem; left: 30%;">Primer B (Rev) ←</div>
+                        <div class="absolute w-0.5 h-3 bg-red-500" style="top: 1.25rem; left: 35%;"></div>
+
+                        <div class="absolute text-xs" style="bottom: 2rem; left: 65%;">→ Primer C (Fwd)</div>
+                        <div class="absolute w-0.5 h-3 bg-green-500" style="bottom: 1.25rem; left: 70%;"></div>
+
+                        <div class="absolute text-xs" style="bottom: 2rem; left: 80%;">← Primer D (Rev)</div>
+                        <div class="absolute w-0.5 h-3 bg-green-500" style="bottom: 1.25rem; left: 85%;"></div>
+                        <div class="text-center text-sm font-semibold mt-2 text-purple-700">geneX</div>
+                    </div>
+                    <div id="primer-choices" class="space-y-2">
+                        <label class="flex items-center"><input type="checkbox" name="primer" value="A" class="mr-2"> Primer A</label>
+                        <label class="flex items-center"><input type="checkbox" name="primer" value="B" class="mr-2"> Primer B</label>
+                        <label class="flex items-center"><input type="checkbox" name="primer" value="C" class="mr-2"> Primer C</label>
+                        <label class="flex items-center"><input type="checkbox" name="primer" value="D" class="mr-2"> Primer D</label>
+                    </div>
+                    <button id="pcr-btn" class="mt-4 bg-sky-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-700 transition">Run PCR</button>
+                    <div id="pcr-feedback" class="mt-4 p-3 rounded-lg hidden"></div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const steps = ['step1', 'step2', 'step3', 'step4'];
+    let currentStep = 0;
+
+    let vectorCorrect = false;
+    let strainCorrect = false;
+
+    // --- Element Selectors ---
+    const workflowSection = document.getElementById('workflow');
+    const controlsSection = document.getElementById('controls');
+    const verificationSection = document.getElementById('verification');
+
+    // Prerequisite Selection Elements
+    const selectPuc18 = document.getElementById('select-puc18');
+    const selectPbr322 = document.getElementById('select-pbr322');
+    const vectorFeedback = document.getElementById('vector-feedback');
+    const selectDh5a = document.getElementById('select-dh5a');
+    const selectJm109 = document.getElementById('select-jm109');
+    const strainFeedback = document.getElementById('strain-feedback');
+
+    // Step 1 Elements
+    const digestBtn = document.getElementById('digest-btn');
+    const digestFeedback = document.getElementById('digest-feedback');
+
+    // Step 2 Elements
+    const ligateBtn = document.getElementById('ligate-btn');
+    const ligateFeedback = document.getElementById('ligate-feedback');
+    const sizeInput = document.getElementById('plasmid-size-input');
+
+    // Step 3 Elements
+    const plateBtn = document.getElementById('plate-btn');
+    const plateFeedback = document.getElementById('plate-feedback');
+
+    // Step 4 Elements
+    const petriDish = document.getElementById('petri-dish');
+    const colonyFeedback = document.getElementById('colony-feedback');
+
+    // Control Section Elements
+    const controlBtn = document.getElementById('control-btn');
+    const controlFeedback = document.getElementById('control-feedback');
+
+    // Verification Section Elements
+    const pcrBtn = document.getElementById('pcr-btn');
+    const pcrFeedback = document.getElementById('pcr-feedback');
+
+    // --- Functions ---
+    function checkPrerequisites() {
+        if (vectorCorrect && strainCorrect) {
+            workflowSection.classList.remove('hidden');
+            document.getElementById('prerequisite-selection').style.opacity = '0.7';
+            document.getElementById('prerequisite-selection').style.pointerEvents = 'none';
+        }
+    }
+
+    function handleStrainSelection(selectedElement) {
+        strainCorrect = true;
+        selectDh5a.classList.remove('selected');
+        selectJm109.classList.remove('selected');
+        selectedElement.classList.add('selected');
+        strainFeedback.className = 'mt-6 p-4 rounded-lg bg-emerald-100 text-emerald-800';
+        strainFeedback.innerHTML = '<strong>Correct Host!</strong> This strain contains the `lacZΔM15` mutation, which is required for α-complementation with the pUC18 vector.';
+        checkPrerequisites();
+    }
+    
+    function advanceToStep(stepIndex) {
+        const currentCard = document.getElementById(steps[currentStep]);
+        if (currentCard) {
+            currentCard.classList.remove('active');
+            currentCard.classList.add('completed');
+        }
+        currentStep = stepIndex;
+        if (currentStep < steps.length) {
+            const nextCard = document.getElementById(steps[currentStep]);
+            if (nextCard) {
+                nextCard.classList.add('active');
+            }
+        } else {
+            // All workflow steps are done, show controls section
+            controlsSection.classList.remove('hidden');
+        }
+    }
+
+    function populatePetriDish() {
+        petriDish.innerHTML = '';
+        for (let i = 0; i < 50; i++) {
+            const colony = document.createElement('div');
+            const isWhite = Math.random() > 0.6;
+            colony.className = 'colony';
+            colony.style.backgroundColor = isWhite ? 'white' : '#3B82F6';
+            colony.style.top = `${10 + Math.random() * 80}%`;
+            colony.style.left = `${10 + Math.random() * 80}%`;
+            colony.dataset.type = isWhite ? 'white' : 'blue';
+            colony.addEventListener('click', handleColonyClick);
+            petriDish.appendChild(colony);
+        }
+    }
+
+    function handleColonyClick(event) {
+        const type = event.target.dataset.type;
+        colonyFeedback.classList.remove('hidden');
+        if (type === 'white') {
+            colonyFeedback.className = 'mt-6 p-4 rounded-lg bg-emerald-100 text-emerald-800';
+            colonyFeedback.innerHTML = `<strong>Correct Choice!</strong> You picked a <strong>white</strong> colony. This indicates a successful insertion!`;
+            // Disable further clicks on colonies and advance
+            document.getElementById('petri-dish').style.pointerEvents = 'none';
+            setTimeout(() => advanceToStep(4), 1500); 
+        } else {
+            colonyFeedback.className = 'mt-6 p-4 rounded-lg bg-blue-100 text-blue-800';
+            colonyFeedback.innerHTML = `<strong>Informative, but not the target.</strong> Blue colonies contain the original, non-recombinant pUC18 plasmid.`;
+        }
+    }
+
+    function renderOutcomeChart() {
+        if (typeof Chart === 'undefined') { return; }
+        const ctx = document.getElementById('outcomeChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['White (Correct Insert)', 'Blue (No Insert)', 'No Growth (No Plasmid)'],
+                datasets: [{
+                    label: 'Transformation Outcomes',
+                    data: [35, 55, 10],
+                    backgroundColor: ['#FFFFFF', '#3B82F6', '#FDE68A'],
+                    borderColor: ['#9CA3AF', '#1D4ED8', '#FBBF24'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } }
+            }
+        });
+    }
+
+    // --- Event Listeners ---
+    // Prerequisite Listeners
+    selectPuc18.addEventListener('click', () => {
+        vectorCorrect = true;
+        selectPuc18.classList.add('selected');
+        selectPbr322.classList.remove('selected');
+        vectorFeedback.className = 'mt-6 p-4 rounded-lg bg-emerald-100 text-emerald-800';
+        vectorFeedback.innerHTML = '<strong>Correct Vector!</strong> pUC18 contains the `lacZα` gene for blue-white screening. Now select a host strain.';
+        checkPrerequisites();
+    });
+
+    selectPbr322.addEventListener('click', () => {
+        vectorCorrect = false;
+        selectPbr322.classList.add('selected');
+        selectPuc18.classList.remove('selected');
+        vectorFeedback.className = 'mt-6 p-4 rounded-lg bg-red-100 text-red-800';
+        vectorFeedback.innerHTML = '<strong>Incorrect Vector.</strong> pBR322 lacks the `lacZα` gene needed for blue-white screening.';
+        workflowSection.classList.add('hidden');
+    });
+
+    selectDh5a.addEventListener('click', () => handleStrainSelection(selectDh5a));
+    selectJm109.addEventListener('click', () => handleStrainSelection(selectJm109));
+
+    // Workflow Step Listeners
+    digestBtn.addEventListener('click', () => {
+        const choices = Array.from(document.querySelectorAll('#enzyme-choices input:checked')).map(cb => cb.value);
+        const correctChoices = ['EcoRI', 'HindIII'];
+        
+        digestFeedback.classList.remove('hidden');
+        if (choices.length === 2 && choices.every(c => correctChoices.includes(c))) {
+            digestFeedback.className = 'mt-4 p-3 rounded-lg bg-emerald-100 text-emerald-800';
+            digestFeedback.innerHTML = '<strong>Correct!</strong> Using both EcoRI and HindIII creates compatible ends for directional cloning.';
+            document.getElementById('plasmid-vis').style.borderRadius = '0';
+            document.getElementById('plasmid-vis').style.borderLeftStyle = 'dashed';
+            document.getElementById('plasmid-vis').style.borderRightStyle = 'dashed';
+            document.getElementById('plasmid-vis').textContent = 'Digested';
+            digestBtn.disabled = true;
+            digestBtn.innerHTML = '<span class="spinner mr-2"></span>Advancing...';
+            setTimeout(() => advanceToStep(1), 1500);
+        } else {
+            digestFeedback.className = 'mt-4 p-3 rounded-lg bg-red-100 text-red-800';
+            digestFeedback.textContent = 'Not quite. Remember, the insert has EcoRI and HindIII sites.';
+        }
+    });
+
+    ligateBtn.addEventListener('click', () => {
+        const correctSize = 2686 + 750;
+        const userSize = parseInt(sizeInput.value);
+
+        ligateFeedback.classList.remove('hidden');
+        if (userSize === correctSize) {
+            ligateFeedback.className = 'mt-4 p-3 rounded-lg bg-emerald-100 text-emerald-800';
+            ligateFeedback.innerHTML = `<strong>Perfect!</strong> 2686 bp (vector) + 750 bp (insert) = ${correctSize} bp.`;
+            ligateBtn.disabled = true;
+            sizeInput.disabled = true;
+            ligateBtn.innerHTML = '<span class="spinner mr-2"></span>Advancing...';
+            setTimeout(() => advanceToStep(2), 1500);
+        } else {
+            ligateFeedback.className = 'mt-4 p-3 rounded-lg bg-red-100 text-red-800';
+            ligateFeedback.textContent = 'Incorrect size. Try calculating it again: size of pUC18 vector + size of geneX insert.';
+        }
+    });
+
+    plateBtn.addEventListener('click', () => {
+        const choices = Array.from(document.querySelectorAll('#plate-choices input:checked')).map(cb => cb.value);
+        const correctChoices = ['Ampicillin', 'IPTG', 'X-gal'];
+        
+        plateFeedback.classList.remove('hidden');
+        const isCorrect = choices.length === 3 && choices.every(c => correctChoices.includes(c));
+
+        if (isCorrect) {
+            plateFeedback.className = 'mt-4 p-3 rounded-lg bg-emerald-100 text-emerald-800';
+            plateFeedback.innerHTML = `<strong>Correct!</strong>
+                <ul class="list-disc list-inside mt-2">
+                    <li><strong>Ampicillin:</strong> Selects for cells that took up a plasmid.</li>
+                    <li><strong>IPTG:</strong> Induces expression of the lacZα gene.</li>
+                    <li><strong>X-gal:</strong> Substrate for the LacZα enzyme to produce color.</li>
+                </ul>`;
+            plateBtn.disabled = true;
+            plateBtn.innerHTML = '<span class="spinner mr-2"></span>Advancing...';
+            setTimeout(() => {
+                advanceToStep(3);
+                populatePetriDish();
+                renderOutcomeChart();
+            }, 2500);
+        } else {
+            plateFeedback.className = 'mt-4 p-3 rounded-lg bg-red-100 text-red-800';
+            plateFeedback.textContent = 'Check your choices. You need one component for selection and two for color-based screening.';
+        }
+    });
+
+    // Control & Verification Listeners
+    controlBtn.addEventListener('click', () => {
+        const choice = document.querySelector('input[name="control-choice"]:checked');
+        controlFeedback.classList.remove('hidden');
+        if (choice && choice.value === 'correct') {
+            controlFeedback.className = 'mt-4 p-3 rounded-lg bg-emerald-100 text-emerald-800';
+            controlFeedback.innerHTML = '<strong>Excellent Analysis!</strong> This result confirms that vector re-ligation is possible and that the IPTG/X-gal system is working as expected. This gives you confidence in your white colonies from the main experiment.';
+            controlBtn.disabled = true;
+            controlBtn.innerHTML = '<span class="spinner mr-2"></span>Advancing...';
+            setTimeout(() => {
+                controlsSection.classList.add('completed');
+                verificationSection.classList.remove('hidden');
+            }, 2000);
+        } else {
+            controlFeedback.className = 'mt-4 p-3 rounded-lg bg-red-100 text-red-800';
+            controlFeedback.textContent = 'Not quite. Think about what a blue colony means in this system. The vector was able to re-ligate, and the intact lacZα gene produced a blue color.';
+        }
+    });
+
+    pcrBtn.addEventListener('click', () => {
+        const choices = Array.from(document.querySelectorAll('#primer-choices input:checked')).map(cb => cb.value);
+        pcrFeedback.classList.remove('hidden');
+        const isCorrect = choices.length === 2 && choices.includes('A') && choices.includes('C');
+        
+        if (isCorrect) {
+            pcrFeedback.className = 'mt-4 p-3 rounded-lg bg-emerald-100 text-emerald-800';
+            pcrFeedback.innerHTML = '<strong>Correct!</strong> Using a forward primer (A) that anneals to the vector and a reverse primer (C) that anneals to the insert confirms both the presence of the insert and its correct 5\'-3\' orientation.';
+            pcrBtn.disabled = true;
+        } else if (choices.length === 2 && choices.includes('A') && choices.includes('B')) {
+             pcrFeedback.className = 'mt-4 p-3 rounded-lg bg-red-100 text-red-800';
+            pcrFeedback.textContent = 'This primer pair would not produce a product, as they are too far apart and point away from each other.';
+        } else {
+            pcrFeedback.className = 'mt-4 p-3 rounded-lg bg-red-100 text-red-800';
+            pcrFeedback.textContent = 'Incorrect pair. To confirm orientation, one primer must be on the vector and the other on the insert. Review the primer locations and directions.';
+        }
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Molecular Biology Hangman</title>
+    <style>
+        /* All CSS styles are placed directly inside the HTML file */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f2f5;
+            padding: 10px;
+            margin: 0;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            margin: 10px auto;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #1c1e21;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            color: #606770;
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-weight: normal;
+        }
+
+        #game-container, #name-container, #result-container {
+            padding: 15px;
+            max-width: 100%;
+            margin: 10px auto;
+            box-sizing: border-box;
+        }
+        
+        #name-container p {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        #username {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #dddfe2;
+            width: calc(100% - 22px);
+            margin-bottom: 10px;
+        }
+
+        #word-display {
+            font-size: 2rem;
+            letter-spacing: 5px;
+            font-weight: bold;
+            margin: 20px 0;
+            min-height: 40px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #333;
+            word-break: break-all;
+        }
+
+        #letters {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            background-color: #1877f2;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #166fe5;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background-color: #e4e6eb;
+            color: #bcc0c4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #hangman {
+            width: 200px;
+            height: 200px;
+            margin: 15px auto;
+        }
+
+        #hangman svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        #question {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 15px;
+            min-height: 50px;
+            padding: 0 10px;
+            line-height: 1.4;
+        }
+
+        #message {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: 15px 0;
+            min-height: 30px;
+        }
+
+        .score-timer {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        #score { color: #31a24c; }
+        #timer { color: #f02849; }
+
+        #next-button {
+            margin: 20px auto;
+            display: none;
+            padding: 12px 24px;
+            background-color: #42b72a;
+        }
+        #next-button:hover {
+             background-color: #36a420;
+        }
+
+        .letter-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 1.1rem;
+            padding: 0;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .space-btn {
+            width: 100px;
+            background-color: #6c757d;
+        }
+        .space-btn:hover {
+            background-color: #5a6268;
+        }
+
+        #gallows, #head, #body, #left-arm, #right-arm, #left-leg, #right-leg {
+            stroke: #333;
+            stroke-width: 4;
+            fill: none;
+            stroke-linecap: round;
+        }
+        
+        /* Modal for messages */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-content p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        .modal-content button {
+            padding: 10px 20px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.5rem; }
+            #word-display { font-size: 1.5rem; letter-spacing: 3px; }
+            #question { font-size: 1.1rem; }
+            .letter-btn { width: 35px; height: 35px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Molecular Biology</h1>
+        <h2>Created by - Dr. M. K. Jaganathan</h2>
+        
+        <div id="name-container">
+            <p>Enter your name to begin:</p>
+            <input type="text" id="username" placeholder="Your Name">
+            <button onclick="startGame()">Start Game</button>
+        </div>
+
+        <div id="game-container" style="display: none;">
+            <p id="question"></p>
+            <div id="hangman">
+                <svg viewBox="0 0 200 200">
+                    <line id="gallows-base" x1="20" y1="180" x2="180" y2="180" />
+                    <line id="gallows-pole" x1="50" y1="180" x2="50" y2="20" />
+                    <line id="gallows-beam" x1="50" y1="20" x2="150" y2="20" />
+                    <line id="gallows-rope" x1="150" y1="20" x2="150" y2="40" />
+                    <circle id="head" cx="150" cy="60" r="20" style="visibility: hidden;" />
+                    <line id="body" x1="150" y1="80" x2="150" y2="130" style="visibility: hidden;" />
+                    <line id="left-arm" x1="150" y1="100" x2="120" y2="120" style="visibility: hidden;" />
+                    <line id="right-arm" x1="150" y1="100" x2="180" y2="120" style="visibility: hidden;" />
+                    <line id="left-leg" x1="150" y1="130" x2="120" y2="160" style="visibility: hidden;" />
+                    <line id="right-leg" x1="150" y1="130" x2="180" y2="160" style="visibility: hidden;" />
+                </svg>
+            </div>
+            <p id="word-display"></p>
+            <div id="letters"></div>
+            <p id="message"></p>
+            <div class="score-timer">
+                <p id="score">Score: 0</p>
+                <p id="timer">Time Left: 60</p>
+            </div>
+            <button id="next-button" onclick="loadNextQuestion()">Next Question</button>
+        </div>
+
+        <div id="result-container" style="display: none;">
+            <h2>Game Over</h2>
+            <p id="final-result"></p>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+    
+    <!-- Modal for showing messages -->
+    <div id="message-modal" class="modal">
+        <div class="modal-content">
+            <p id="modal-text"></p>
+            <button id="modal-close-btn">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // All JavaScript is placed directly inside the HTML file
+
+        // The answers in gameData are obfuscated using Base64 encoding.
+        // For example, the answer "lysis" is stored as "bHlzaXM=".
+        // The atob() function is used to decode the answer at runtime.
+        const gameData = [
+            { question: "During DNA isolation, cells are typically lysed using a _________ buffer.", answer: "bHlzaXM=" },
+            { question: "To separate DNA from other cellular components, ____________________ is commonly used to precipitate DNA.", answer: "ZXRoYW5vbA==" },
+            { question: "During DNA isolation, ____________________ is used to degrade proteins, preventing their co-precipitation with DNA.", answer: "UHJvdGVhc2UgSw==" },
+            { question: "The final step in many DNA isolation protocols involves resuspending the purified DNA in a low-salt buffer, such as ____________________.", answer: "VEUgYnVmZmVy" },
+            { question: "For plant DNA isolation, a common initial step is mechanical disruption, often using a ____________________ and mortar with liquid nitrogen.", answer: "cGVzdGxl" },
+            { question: "A key step in preparing a sample for DNA isolation is to homogenize the tissue or cells to ensure efficient ____________lysis____________.", answer: "bHlzaXM=" },
+            { question: "The primary goal of DNA isolation is to obtain DNA that is both pure and ____________________.", answer: "aW50YWN0" },
+            { question: "For quantifying DNA concentration after isolation, a spectrophotometer measures absorbance at ____________________ nm.", answer: "MjYw" },
+            { question: "The purpose of adding RNase during genomic DNA isolation is to remove contaminating ____________________.", answer: "Uk5B" },
+            { question: "When isolating DNA from blood, ____________________ is typically used to lyse red blood cells while preserving white blood cells, which contain the DNA.", answer: "bHlzaXMgYnVmZmVy" },
+            { question: "In plasmid isolation, the alkaline lysis method uses ________________________ to denature chromosomal and plasmid DNA.", answer: "aGlnaCBwSA==" },
+            { question: "Following alkaline denaturation in plasmid isolation, ________________________ is added to neutralize the solution, causing chromosomal DNA and proteins to precipitate.", answer: "UG90YXNzaXVtIGFjZXRhdGU=" },
+            { question: "After neutralization and centrifugation in plasmid isolation, the plasmid DNA remains in the ____________________.", answer: "c3VwZXJuYXRhbnQ=" },
+            { question: "Column-based plasmid isolation methods utilize a silica-based membrane to bind DNA in the presence of high ____________salt____________.", answer: "c2FsdA==" },
+            { question: "To elute plasmid DNA from a silica column, a low-salt buffer or ____________________ is used.", answer: "d2F0ZXI=" },
+            { question: "During plasmid isolation, SDS (Sodium Dodecyl Sulfate) is a ____________________ that helps to disrupt bacterial cell membranes and denature proteins.", answer: "ZGV0ZXJnZW50" },
+            { question: "When isolating plasmid DNA, the initial bacterial pellet is typically resuspended in a buffer containing __________ to weaken the cell wall.", answer: "bHlzb3p5bWU=" },
+            { question: "For large-scale plasmid isolation, a ________________________ culture volume is typically used.", answer: "bGFyZ2U=" },
+            { question: "During plasmid isolation, the addition of a high-salt, low-pH solution causes the precipitation of chromosomal DNA and proteins, which is then removed by _________________.", answer: "Y2VudHJpZnVnYXRpb24=" },
+            { question: "In plasmid isolation using the boiling method, brief heating denatures proteins and chromosomal DNA, while ______________ plasmid DNA remains intact.", answer: "c3VwZXJjb2lsZWQ=" },
+            { question: "During RNA isolation, the enzyme ________________ is critical for degrading contaminating DNA.", answer: "RE5hc2U=" },
+            { question: "RNA is highly susceptible to degradation by ubiquitous enzymes called ________________________.", answer: "Uk5hc2Vz" },
+            { question: "To inhibit RNase activity during RNA isolation, researchers often work in a ________________________-free environment.", answer: "Uk5hc2U=" },
+            { question: "A common chaotropic agent used in RNA isolation to denature proteins and inactivate RNases is ________________________ isothiocyanate.", answer: "R3VhbmlkaW5pdW0=" },
+            { question: "After phenol-chloroform extraction in RNA isolation, RNA partitions into the ________________________ phase.", answer: "YXF1ZW91cw==" },
+            { question: "In RNA isolation using phenol-chloroform, ________________________ is often added to the phenol mixture to stabilize the interface and ensure cleaner separation of phases.", answer: "aXNvYW15bCBhbGNvaG9s" },
+            { question: "The quality and quantity of isolated RNA can be assessed using a spectrophotometer by measuring absorbance at 260 nm and 280 nm, yielding the A260/A280 ratio to indicate ________________________ contamination.", answer: "cHJvdGVpbg==" },
+            { question: "When isolating RNA, extreme care must be taken to avoid contamination from ________________________, which are found on skin and dust.", answer: "Uk5hc2Vz" },
+            { question: "During RNA isolation, an A260/A230 ratio below 1.8 typically indicates contamination by ________________________, such as guanidinium salts or phenol.", answer: "b3JnYW5pYyBjb21wb3VuZHM=" },
+            { question: "In RNA isolation, a common method to separate RNA from DNA and proteins involves using a density gradient, such as ____________________ chloride.", answer: "Y2VzaXVt" },
+            { question: "After RNA isolation, it is common to assess the RNA integrity using gel electrophoresis to check for intact ribosomal RNA ________________________.", answer: "YmFuZHM=" },
+            { question: "To minimize degradation during DNA and RNA isolation, all reagents and equipment should be kept ________________________.", answer: "Y29sZA==" },
+            { question: "RNA is typically stored in a freezer at ________________________ with RNase inhibitors to prevent degradation.", answer: "LTgwJ0M=" },
+            { question: "For RNA isolation from animal tissues, a common initial step is mechanical disruption using a ________________________ or bead beating.", answer: "c29uaWNhdG9y" },
+            { question: "________________________ is the process by which foreign DNA is introduced into a bacterial cell.", answer: "VHJhbnNmb3JtYXRpb24=" },
+            { question: "Bacterial cells are made ________________________ to DNA by treatments such as heat shock or electroporation.", answer: "Y29tcGV0ZW50" },
+            { question: "For heat shock transformation, bacterial cells are incubated with DNA on ice, followed by a brief exposure to ________________________, and then returned to ice.", answer: "aGlnaCB0ZW1wZXJhdHVyZQ==" },
+            { question: "In electroporation, a short ________________________ pulse is applied to create temporary pores in the bacterial cell membrane.", answer: "ZWxlY3RyaWM=" },
+            { question: "After transformation, bacteria are typically grown on selective media containing an ________________________ resistance gene encoded by the plasmid.", answer: "YW50aWJpb3RpYw==" },
+            { question: "To increase the efficiency of transformation, bacterial cells are often treated with calcium chloride ($CaCl_2$) to make their membranes more permeable to DNA, a process known as chemical ________________________.", answer: "cGVybWVhYmlsaXphdGlvbg==" },
+            { question: "Competent cells prepared for transformation are typically stored at ________________________ for long-term preservation.", answer: "LTgwJ0M=" },
+            { question: "After transformation, bacteria are typically allowed a recovery period in ________________________ media before plating on selective media.", answer: "cmljaA==" },
+            { question: "In chemical transformation, the bacterial cells are incubated with DNA in the presence of ________________________ ions, typically from $CaCl_2$.", answer: "Y2FsY2l1bQ==" },
+            { question: "After chemical transformation, a brief heat shock step at ________________________ increases the permeability of the bacterial cell membrane.", answer: "NDLCQw==" },
+            { question: "The process of introducing foreign DNA into eukaryotic cells is generally referred to as ________________________.", answer: "dHJhbnNmZWN0aW9u" },
+            { question: "The efficiency of transformation can be quantified by calculating the number of transformants per ________________________ of DNA.", answer: "bWljcm9ncmFt" },
+            { question: "The choice of bacterial strain for transformation depends on factors such as its ________________________ efficiency and compatibility with the plasmid.", answer: "dHJhbnNmb3JtYXRpb24=" },
+            { question: "________________________ enzymes recognize and cut DNA at specific nucleotide sequences.", answer: "UmVzdHJpY3Rpb24=" },
+            { question: "The specific DNA sequences recognized by restriction enzymes are often ________________________, meaning they read the same forwards and backwards on opposite strands.", answer: "cGFsaW5kcm9taWM=" },
+            { question: "Restriction enzymes can produce two types of ends: blunt ends or ________________________ ends.", answer: "c3RpY2t5" },
+            { question: "When sticky ends are generated, they can spontaneously anneal with complementary sticky ends from other DNA fragments through ________________________ bonding.", answer: "aHlkcm9nZW4=" },
+            { question: "To visualize restriction enzyme digestion products, DNA fragments are typically separated by size using ________________________ electrophoresis.", answer: "YWdhcm9zZSBnZWw=" },
+            { question: "Ligation requires an energy source, typically ________________________, to form the phosphodiester bond.", answer: "QVRQ" },
+            { question: "For successful ligation, the DNA fragments must have compatible ________________________.", answer: "ZW5z" },
+            { question: "The optimal temperature for most ligase enzymes, particularly T4 DNA ligase, is around ________________________.", answer: "MTbCQw==" },
+            { question: "When performing ligation, a molar ratio of ________________________ for insert to vector is often desired to promote efficient insertion.", answer: "Mzox" },
+            { question: "Restriction enzymes are endonucleases, meaning they cut DNA ________________________ the polynucleotide chain.", answer: "d2l0aGlu" },
+            { question: "After restriction digestion, the DNA fragments can be purified using a ________________________ kit to remove enzymes and buffers.", answer: "RE5BIGNsZWFuLXVw" },
+            { question: "For maximum yield in ligation, the reaction is often performed overnight at a lower temperature to allow for more stable ________________________ of sticky ends.", answer: "YW5uZWFsaW5n" },
+            { question: "A restriction enzyme that recognizes $GAATTC$ and cuts between G and A on both strands produces ________________________ ends.", answer: "c3RpY2t5" },
+            { question: "The optimal ratio of insert to vector DNA in a ligation reaction is crucial to minimize the formation of ________________________ plasmid.", answer: "c2VsZi1saWdhdGVk" },
+            { question: "The fragment of DNA to be inserted into a vector during cloning is often referred to as the ________________________.", answer: "aW5zZXJ0" },
+            { question: "A common method for detecting DNA on an agarose gel is staining with ________________________ bromide, which intercalates into DNA and fluoresces under UV light.", answer: "ZXRoaWRpdW0=" },
+            { question: "Restriction enzyme reactions are typically performed at an optimal temperature, usually ________________________, which mimics bacterial physiological conditions.", answer: "MznCQw==" },
+            { question: "In DNA ligation, the enzyme forms a phosphodiester bond between the 3'-hydroxyl group of one nucleotide and the 5'-________________________ group of another.", answer: "cGhvc3BoYXRl" },
+            { question: "When separating DNA fragments by agarose gel electrophoresis, larger fragments migrate more ________________________ through the gel matrix.", answer: "c2xvd2x5" },
+            { question: "A restriction map is a diagram that shows the positions of ________________________ sites on a DNA molecule.", answer: "cmVzdHJpY3Rpb24=" },
+            { question: "When setting up a ligation reaction, it is crucial to use an appropriate ________________________, which provides the necessary ions and optimal pH for the enzyme.", answer: "YnVmZmVy" },
+            { question: "Some restriction enzymes generate blunt ends, meaning they cut both DNA strands directly ________________________ each other.", answer: "b3Bwb3NpdGU=" },
+            { question: "For effective ligation, the concentration of DNA fragments in the reaction should be optimized to promote intermolecular ligation over ________________________.", answer: "aW50cmFtb2xlY3VsYXIgbGlnYXRpb24=" },
+            { question: "The process of using gel electrophoresis to isolate a specific DNA fragment from a mixture is called gel ________________________.", answer: "ZXh0cmFjdGlvbg==" },
+            { question: "After ligation, the mixture is typically used to transform bacterial cells, which then serve as hosts for DNA ________________________.", answer: "cmVwbGljYXRpb24=" },
+            { question: "When using restriction enzymes, a common problem is ________________________ digestion, where the enzyme fails to cut at all recognition sites.", answer: "cGFydGlhbA==" }
+        ];
+
+        // Game state variables
+        let playerName = '';
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let currentWord = '';
+        let maskedWord = [];
+        let guessedLetters = new Set();
+        let incorrectGuesses = 0;
+        const maxIncorrectGuesses = 6;
+        let score = 0;
+        let timer;
+        let timeLeft = 60;
+        let gameActive = false;
+
+        // DOM elements
+        const nameContainer = document.getElementById('name-container');
+        const gameContainer = document.getElementById('game-container');
+        const resultContainer = document.getElementById('result-container');
+        const usernameInput = document.getElementById('username');
+        const questionDisplay = document.getElementById('question');
+        const wordDisplay = document.getElementById('word-display');
+        const lettersContainer = document.getElementById('letters');
+        const messageDisplay = document.getElementById('message');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const nextButton = document.getElementById('next-button');
+        const finalResultDisplay = document.getElementById('final-result');
+        const hangmanParts = ['head', 'body', 'left-arm', 'right-arm', 'left-leg', 'right-leg'];
+        const modal = document.getElementById('message-modal');
+        const modalText = document.getElementById('modal-text');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        // Modal close functionality
+        modalCloseBtn.onclick = () => { modal.style.display = "none"; };
+        window.onclick = (event) => {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+
+        function showMessageBox(message) {
+            modalText.textContent = message;
+            modal.style.display = "block";
+        }
+
+        function startGame() {
+            playerName = usernameInput.value.trim();
+            if (playerName) {
+                nameContainer.style.display = 'none';
+                gameContainer.style.display = 'block';
+                initializeGame();
+            } else {
+                showMessageBox("Please enter your name!");
+            }
+        }
+
+        function initializeGame() {
+            currentQuestions = shuffleArray(gameData).slice(0, 10); // Get 10 random questions
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            loadNextQuestion();
+        }
+
+        function loadNextQuestion() {
+            if (currentQuestionIndex < currentQuestions.length) {
+                resetForNewQuestion();
+                const { question, answer } = currentQuestions[currentQuestionIndex];
+                
+                // Decode the answer from Base64
+                try {
+                    currentWord = atob(answer).toUpperCase().replace(/[^A-Z0-9\s-]/g, '');
+                } catch (e) {
+                    console.error("Failed to decode answer:", answer, e);
+                    // Skip to next question if there's an error
+                    currentQuestionIndex++;
+                    loadNextQuestion();
+                    return;
+                }
+
+                maskedWord = currentWord.replace(/[A-Z0-9]/g, '_');
+                
+                // Handle spaces in the answer
+                for (let i = 0; i < currentWord.length; i++) {
+                    if (currentWord[i] === ' ' || currentWord[i] === '-') {
+                        const newMasked = maskedWord.split('');
+                        newMasked[i] = currentWord[i];
+                        maskedWord = newMasked.join('');
+                    }
+                }
+
+                questionDisplay.textContent = `${currentQuestionIndex + 1}. ${question}`;
+                wordDisplay.textContent = maskedWord.split('').join(' ');
+                
+                startTimer();
+            } else {
+                endGame();
+            }
+        }
+
+        function resetForNewQuestion() {
+            gameActive = true;
+            incorrectGuesses = 0;
+            guessedLetters.clear();
+            messageDisplay.textContent = '';
+            nextButton.style.display = 'none';
+            
+            // Reset hangman
+            hangmanParts.forEach(partId => {
+                const part = document.getElementById(partId);
+                if(part) part.style.visibility = 'hidden';
+            });
+            
+            // Create letter buttons
+            lettersContainer.innerHTML = '';
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('').forEach(letter => {
+                const btn = document.createElement('button');
+                btn.textContent = letter;
+                btn.classList.add('letter-btn');
+                btn.onclick = () => handleGuess(letter);
+                lettersContainer.appendChild(btn);
+            });
+
+            clearTimeout(timer);
+            timeLeft = 60;
+            timerDisplay.textContent = `Time Left: ${timeLeft}`;
+        }
+
+        function handleGuess(letter) {
+            if (!gameActive || guessedLetters.has(letter)) return;
+
+            guessedLetters.add(letter);
+            
+            // Disable the guessed button
+            const buttons = lettersContainer.getElementsByTagName('button');
+            for (let btn of buttons) {
+                if (btn.textContent === letter) {
+                    btn.disabled = true;
+                    break;
+                }
+            }
+
+            if (currentWord.includes(letter)) {
+                let newMaskedWordArr = maskedWord.split('');
+                for (let i = 0; i < currentWord.length; i++) {
+                    if (currentWord[i] === letter) {
+                        newMaskedWordArr[i] = letter;
+                    }
+                }
+                maskedWord = newMaskedWordArr.join('');
+                wordDisplay.textContent = maskedWord.split('').join(' ');
+
+                if (maskedWord === currentWord) {
+                    winRound();
+                }
+            } else {
+                incorrectGuesses++;
+                drawHangmanPart();
+                if (incorrectGuesses >= maxIncorrectGuesses) {
+                    loseRound();
+                }
+            }
+        }
+
+        function drawHangmanPart() {
+            if (incorrectGuesses > 0 && incorrectGuesses <= hangmanParts.length) {
+                const part = document.getElementById(hangmanParts[incorrectGuesses - 1]);
+                if(part) part.style.visibility = 'visible';
+            }
+        }
+
+        function startTimer() {
+            gameActive = true;
+            timer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `Time Left: ${timeLeft}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    loseRound();
+                }
+            }, 1000);
+        }
+
+        function winRound() {
+            clearInterval(timer);
+            score++;
+            scoreDisplay.textContent = `Score: ${score}`;
+            messageDisplay.textContent = 'Correct!';
+            messageDisplay.style.color = '#31a24c';
+            gameActive = false;
+            currentQuestionIndex++;
+            nextButton.style.display = 'block';
+        }
+
+        function loseRound() {
+            clearInterval(timer);
+            messageDisplay.textContent = `The correct word was: ${currentWord}`;
+            messageDisplay.style.color = '#f02849';
+            gameActive = false;
+            currentQuestionIndex++;
+            nextButton.style.display = 'block';
+        }
+
+        function endGame() {
+            gameContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+            finalResultDisplay.textContent = `${playerName}, your final score is ${score} out of ${currentQuestions.length}.`;
+        }
+
+        function restartGame() {
+            resultContainer.style.display = 'none';
+            nameContainer.style.display = 'block';
+            usernameInput.value = '';
+        }
+
+        // Utility function to shuffle an array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>
