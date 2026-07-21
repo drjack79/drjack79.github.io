@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Protein X - Gene Cloning Strategy Game</title>
+<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=eRdF6fHA63Qa6RiwioLHhuRVar74bpHWdnBm4H1TAZ-bXTZ-5LVBEZVF7xJFCHSFXKhIhQZiU6NPB0dkluMrdupwjcBSIGYYqr7k2Igv0KS7o7-SjbmvXNnMmMqi-JgLFeibTJUCN5BUrXNJypXelHCQQjB3pVh4NjllU2a81__mXYHcVohfwUbz-qyDk4dBXJyYsx4p44kmRrXvSM76xeQzrTiwYDU9y_ANU6kCKfYDakmjGGeHn5cXUEwz-LmMUQTzkt2CPBeGyXST87IWvXSqItQ1k9bV8u83jqFO1d7sC0-Y2tDkDE8ntWPalJ2ZoHyHC5YamtD01tdseYx8mA" charset="UTF-8"></script><style>
+body{font-family:Arial,sans-serif;background:#eef6fb;margin:0;color:#1f2937}
+header{background:linear-gradient(90deg,#0f766e,#2563eb);color:#fff;padding:25px;text-align:center}
+.container{max-width:1100px;margin:auto;padding:20px}
+.card{background:#fff;border-radius:10px;padding:18px;margin:18px 0;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.tool{padding:8px;border:1px solid #ccc;border-radius:6px;background:#fafafa}
+button{background:#2563eb;color:#fff;border:none;padding:10px 18px;border-radius:6px;cursor:pointer}
+button:hover{background:#1d4ed8}
+.challenge{padding:15px;background:#ecfeff;border-left:5px solid #0891b2;margin-top:10px}
+.score input{width:100%}
+.timer{font-size:2em;font-weight:bold;color:#dc2626}
+footer{text-align:center;padding:20px;color:#666}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Gene Manipulation and Genomics</h1>
+<h1>🧬 Mission Protein X</h1>
+<h3>Design the Best Strategy to Clone a Gene Producing Protein X</h3>
+<h3>By Dr. M. K. Jaganathan</h3>
+</header>
+
+<div class="container">
+
+<div class="card">
+<h2>Scenario</h2>
+<p>Your biotechnology company has discovered <b>Protein X</b>, a promising therapeutic protein.
+Your team must design the best cloning strategy to produce recombinant Protein X.</p>
+<ul>
+<li>⏱ Time: 20 minutes</li>
+<li>👥 Team: 4–6 students</li>
+<li>🏆 Goal: Win the biotechnology contract!</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>20 Minute Countdown</h2>
+<div class="timer" id="timer">20:00</div>
+<button onclick="startTimer()">Start Timer</button>
+</div>
+
+<div class="card">
+<h2>Select Your Molecular Biology Tools</h2>
+<div class="grid" id="tools"></div>
+</div>
+
+<div class="card">
+<h2>Random Challenge Card</h2>
+<button onclick="drawChallenge()">Draw Challenge</button>
+<div id="challenge" class="challenge">Click the button to receive your challenge.</div>
+</div>
+
+<div class="card">
+<h2>Team Discussion Questions</h2>
+<ol>
+<li>What is the best DNA source?</li>
+<li>Will you use genomic DNA or cDNA?</li>
+<li>Which cloning method will you choose?</li>
+<li>Which vector is suitable?</li>
+<li>Which host organism will express Protein X?</li>
+<li>How will you verify successful cloning?</li>
+<li>How will you purify Protein X?</li>
+</ol>
+</div>
+
+<div class="card score">
+<h2>Judge's Scoring</h2>
+
+<label>Workflow Correctness (0–20)</label>
+<input type="range" min="0" max="20" value="10" id="s1">
+
+<label>Choice of Techniques (0–20)</label>
+<input type="range" min="0" max="20" value="10" id="s2">
+
+<label>Scientific Reasoning (0–20)</label>
+<input type="range" min="0" max="20" value="10" id="s3">
+
+<label>Challenge Solution (0–20)</label>
+<input type="range" min="0" max="20" value="10" id="s4">
+
+<label>Presentation (0–20)</label>
+<input type="range" min="0" max="20" value="10" id="s5">
+
+<br><br>
+<button onclick="calculate()">Calculate Score</button>
+
+<h2 id="result"></h2>
+</div>
+
+<div class="card">
+<h2>Winning Pitch</h2>
+<p>Each team gets <b>90 seconds</b> to convince the Scientific Funding Committee that their cloning strategy is the most scientifically sound, cost-effective, and feasible.</p>
+</div>
+
+</div>
+
+<footer>
+Mission Protein X • Gene manipulation and Genomics Classroom Game
+</footer>
+
+<script>
+const tools=[
+"Genomic DNA","mRNA","cDNA","PCR","Reverse Transcriptase",
+"Restriction Enzyme","DNA Ligase","Gibson Assembly",
+"TA Cloning","pET28a","pUC19","pGEX",
+"Competent E.coli","Antibiotic Selection",
+"Colony PCR","DNA Sequencing",
+"IPTG Induction","Ni-NTA Purification"
+];
+
+const box=document.getElementById("tools");
+
+tools.forEach(t=>{
+let div=document.createElement("div");
+div.className="tool";
+div.innerHTML=`<label><input type="checkbox"> ${t}</label>`;
+box.appendChild(div);
+});
+
+const challenges=[
+"Protein X contains introns.",
+"Only mRNA is available.",
+"Restriction sites occur inside the gene.",
+"Protein X is toxic to E. coli.",
+"No antibody is available.",
+"Budget reduced by 50%.",
+"PCR failed.",
+"Insert cloned in the wrong orientation.",
+"Protein forms inclusion bodies."
+];
+
+function drawChallenge(){
+let c=challenges[Math.floor(Math.random()*challenges.length)];
+document.getElementById("challenge").innerHTML="<b>Challenge:</b> "+c;
+}
+
+function calculate(){
+let total=
++document.getElementById("s1").value+
++document.getElementById("s2").value+
++document.getElementById("s3").value+
++document.getElementById("s4").value+
++ +document.getElementById("s5").value;
+document.getElementById("result").innerHTML="🏆 Total Score: "+total+" / 100";
+}
+
+let interval;
+function startTimer(){
+clearInterval(interval);
+let duration=20*60;
+interval=setInterval(function(){
+let m=Math.floor(duration/60);
+let s=duration%60;
+document.getElementById("timer").textContent=
+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
+duration--;
+if(duration<0){
+clearInterval(interval);
+document.getElementById("timer").textContent="Time's Up!";
+}
+},1000);
+}
+</script>
+
+</body>
+</html>
