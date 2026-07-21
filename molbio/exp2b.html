@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantitative Analysis of Genomic DNA</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f4f8fb;
+    color:#333;
+    line-height:1.7;
+}
+
+header{
+    background:#0A71C4;
+    color:white;
+    text-align:center;
+    padding:40px 20px;
+}
+
+nav{
+    background:#032D63;
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    padding:15px 20px;
+}
+
+nav a:hover{
+    background:#00796b;
+}
+
+.container{
+    width:90%;
+    max-width:1000px;
+    margin:auto;
+    padding:30px 0;
+}
+
+section{
+    background:white;
+    margin-bottom:25px;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 3px 10px rgba(0,0,0,.1);
+}
+
+.simulation-section {
+    text-align: center;
+}
+
+h2{
+    color:#00695c;
+    margin-bottom:15px;
+}
+
+ul{
+    padding-left:20px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+table th, table td{
+    border:1px solid #ddd;
+    padding:10px;
+}
+
+table th{
+    background:#033469;
+    color:white;
+}
+
+footer{
+    background:#032D63;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+
+@media(max-width:700px){
+
+nav{
+flex-direction:column;
+}
+
+nav a{
+text-align:center;
+border-top:1px solid rgba(255,255,255,.2);
+}
+
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h1>SRM Institite of Science and Technology</h1>
+<p>Department of Biotechnology</p>
+<h1>21BTC208L- Molecular Biology Laboratory</h1>
+<h1>Quantitative Analysis of Genomic DNA</h1>
+</header>
+
+<nav>
+<a href="#aim">Aim</a>
+<a href="#principle">Principle</a>
+<a href="#materials">Materials</a>
+<a href="#procedure">Procedure and Simulation</a>
+<a href="#precautions">Precautions</a>
+</nav>
+
+<div class="container">
+
+<section id="aim">
+<h2>Aim</h2>
+<p>To determine the amount, concentration and purity of the given DNA sample.</p>
+</section>
+
+<section id="principle">
+<h2>Principle</h2>
+
+<p>This experiment is purely an application of the Beer Lamberts’ Law which states that the concentration of the sample is directly proportional to the absorbance of light done by the sample. It is given by following expression:</p>
+<p>𝑨 = ℇ ∗ 𝒄 ∗ 𝒍</p>
+<p>The device UV spectrophotometer works on this principle and used to find the concentration of the sample. Concentration and quality of a sample of DNA is measured with a UV spectrophotometer. A standard graph can be drawn using different concentrations of DNA and OD (optical density) values.</p>
+
+</section>
+
+<section id="materials">
+
+<h2>Materials Required</h2>
+
+<ul>
+<li>TE buffer (pH 8.0) (10 mM Tris, 1mM EDTA)</li>
+<li>UV spectrophotometer</li>
+<li>DNA sample</li>
+<li>Autoclaved Distilled Water</li>
+<li>Microcentrifuge tubes</li>
+<li>Micropipettes and Tips</li>
+
+</ul>
+
+</section>
+
+<section id="procedure">
+
+<h2>Procedure</h2>
+
+<ol>
+
+<li>Take the DNA sample (10 ul) in TE buffer.</li>
+<li>Now dilute the above sample by the factor of 100 i. e, by taking 10μl of the sample in 990μl of TE buffer.</li>
+<li>After doing this take the optical density value at A260 & A280 and calculate the amount of DNA recovered.</li>
+<li>Use the following formula to determine the concentration of DNA: Total DNA (ug) = (A260)*(50 ug/ml/A260)*(100)*(0.1 ml)</li>
+<li>where 100 is the dilution factor and 0.1 ml is the total volume of the DNA.</li>
+<li>Quality: DNA quality measurement is based on the fact that OD at 260 nm is twice that at 280 nm if the solution contains pure DNA. If there is a contaminant, there is some additional OD, which decreases the OD ratio between 260 and 280 nm.</li>
+<li>Clean DNA has a OD260/OD280 between 1.8 and 2.0.</li>
+</ol>
+
+</section>
+
+<section class="simulation-section">
+    <h2>
+        <a href="https://genomic-dna-analyzer.netlify.app/">
+            Interactive Simulation for Quantitative Analysis of Genomic DNA
+        </a>
+    </h2>
+</section>
+
+<section id="precautions">
+
+<h2>Precautions</h2>
+
+<ul>
+<li> Use DNase-free plasticware and reagents.</li>
+</ul>
+
+</section>
+
+</div>
+
+<footer>
+
+<p>Department of Biotechnology</p>
+
+<p>Quantitative Analysis of Genomic DNA</p>
+
+</footer>
+
+</body>
+</html>
